@@ -31,23 +31,30 @@ import java.util.List;
 public class EarthquakeActivity extends AppCompatActivity {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
+    private EarthquakeAdapter mAdapter;
     private static final String USGS_REQUEST_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
 
-    private List<Earthquake> earthquakes = new ArrayList<Earthquake>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
+
+        EarthquakeAsycTask asycTask = new EarthquakeAsycTask();
+        asycTask.execute(USGS_REQUEST_URL);
         //earthquakes.add(new Earthquake(0.1, "Home", 200L, "www.google.com"));
         // Find a reference to the {@link ListView} in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
 
         // Create a new {@link ArrayAdapter} of earthquakes
-        EarthquakeAdapter adapter = new EarthquakeAdapter(this, android.R.layout.simple_list_item_1, (ArrayList<Earthquake>) earthquakes);
-
+        // Old
+        //mAdapter = new EarthquakeAdapter(this, android.R.layout.simple_list_item_1, (ArrayList<Earthquake>) earthquakes);
+        // New
+        mAdapter = new EarthquakeAdapter(this, android.R.layout.simple_list_item_1, new ArrayList<Earthquake>());
+        // Failure to change this will cause a nullpointerexception, as the EarthquakeAdapter is trying to find the size of the array, when it doesn't actually exist yet! Alternatively, you could
+        // do List<Earthquake> = new ArrayList<Earthquake>(); as a global variable, but that's a waste of memory, so no.
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
-        earthquakeListView.setAdapter(adapter);
+        earthquakeListView.setAdapter(mAdapter);
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -59,15 +66,18 @@ public class EarthquakeActivity extends AppCompatActivity {
         });
     }
 
-    private static class EarthquakeAsycTask extends AsyncTask<String, Void, List<Earthquake>> {
+    private class EarthquakeAsycTask extends AsyncTask<String, Void, List<Earthquake>> {
         @Override
         protected List<Earthquake> doInBackground(String... urls) {
-
-            return null;
+            return QueryUtils.fetchEarthquakeData(urls[0]);
         }
 
         @Override
-        protected void onPostExecute(List<Earthquake> earthquakes) {
+        protected void onPostExecute(List<Earthquake> earthquakeList) {
+            mAdapter.clear();
+            if (earthquakeList != null && !earthquakeList.isEmpty()) {
+                mAdapter.addAll(earthquakeList);
+            }
 
         }
     }
