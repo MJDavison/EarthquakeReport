@@ -22,24 +22,25 @@ import java.util.List;
 /**
  * Helper methods related to requesting and receiving earthquake data from USGS.
  */
-public final class QueryUtils {
+public final class QueryUtilsActivity {
 
-    private static final String LOG_TAG = QueryUtils.class.getSimpleName();
+    private static final String LOG_TAG = QueryUtilsActivity.class.getSimpleName();
     private static final String SAMPLE_JSON_RESPONSE = "";
 
 
     /**
-     * Create a private constructor because no one should ever create a {@link QueryUtils} object.
+     * Create a private constructor because no one should ever create a {@link QueryUtilsActivity} object.
      * This class is only meant to hold static variables and methods, which can be accessed
      * directly from the class name QueryUtils (and an object instance of QueryUtils is not needed).
      */
-    private QueryUtils() {
+    private QueryUtilsActivity() {
     }
 
     /**
      * Query the USGS dataset and return an {@link Earthquake} object to represent a single earthquake.
      */
     public static ArrayList<Earthquake> fetchEarthquakeData(String requestUrl) {
+        Log.i(LOG_TAG, "fetchEarthquakeDate()");
         // Create URL object
         URL url = createUrl(requestUrl);
 
@@ -90,6 +91,7 @@ public final class QueryUtils {
             urlConnection.setConnectTimeout(15000 /* milliseconds */);
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
+
 
             // If the request was successful (response code 200),
             // then read the input stream and parse the response.
